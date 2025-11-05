@@ -1,23 +1,23 @@
 import boto3
 import datetime
-import random
 
-# --- Connect to AWS services ---
-ec2 = boto3.client('ec2')
-s3 = boto3.client('s3')
-cloudwatch = boto3.client('cloudwatch')
+# --- Connect to AWS services in your chosen region ---
+REGION = 'eu-north-1'  # Replace with your EC2/S3 region
+ec2 = boto3.client('ec2', region_name=REGION)
+s3 = boto3.client('s3', region_name=REGION)
+cloudwatch = boto3.client('cloudwatch', region_name=REGION)
 
 
 def get_ec2_cpu(instance_id):
     """
-    Fetches average CPU utilization for the last hour for an EC2 instance.
-    Falls back to simulated data if no metrics or access issues occur.
+    Fetches average CPU utilization for the last hour for a specific EC2 instance.
+    Only returns live metrics from CloudWatch. No simulated fallback.
     """
     end_time = datetime.datetime.utcnow()
     start_time = end_time - datetime.timedelta(hours=1)
 
     try:
-        # Request CPU utilization data from CloudWatch
+        # Request CPU metrics from CloudWatch
         metrics = cloudwatch.get_metric_statistics(
             Namespace='AWS/EC2',
             MetricName='CPUUtilization',
@@ -28,36 +28,40 @@ def get_ec2_cpu(instance_id):
             Statistics=['Average']
         )
 
-        # Extract average values from the metrics data
+        # Debug: check CloudWatch response
+        print(f"CloudWatch metrics for EC2 {instance_id}:", metrics)
+
         cpu_values = [point['Average'] for point in metrics['Datapoints']]
 
-        # If AWS returns no data, simulate some realistic CPU usage
         if not cpu_values:
-            cpu_values = [round(random.uniform(10, 50), 1) for _ in range(12)]
+            print("Warning: CloudWatch returned no CPU data.")
+            return []
 
-    except Exception:
-        # On any error, simulate data (safe fallback)
-        cpu_values = [round(random.uniform(10, 50), 1) for _ in range(12)]
+        return cpu_values
 
-    return cpu_values
+    except Exception as e:
+        print(f"Error fetching EC2 CPU metrics: {e}")
+        return []
 
 
 def get_s3_storage(bucket_name):
     """
-    Calculates the total storage size of an S3 bucket in bytes.
-    If unable to connect or access, returns simulated data.
+    Returns the total storage size (bytes) of an S3 bucket.
+    Only uses live data. Returns 0 if bucket is empty or inaccessible.
     """
     try:
         total_size = 0
         response = s3.list_objects_v2(Bucket=bucket_name)
 
+        # Debug: check S3 response
+        print(f"S3 response for bucket {bucket_name}:", response)
+
         if 'Contents' in response:
             for obj in response['Contents']:
                 total_size += obj['Size']
 
-        # Return actual size or 0 if bucket empty
-        return total_size if total_size > 0 else 3_000_000_000
+        return total_size
 
-    except Exception:
-        # Fallback simulated size (~3GB)
-        return 3_000_000_000
+    except Exception as e:
+        print(f"Error fetching S3 storage: {e}")
+        return 0
