@@ -5,40 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>☁️ Cloud Resource Dashboard</title>
 
-    <!-- Basic Bootstrap for clean styling -->
-    <link 
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
-      rel="stylesheet">
+    <!-- Bootstrap 5 for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Optional: Chart.js (for adding charts later if needed) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f5f7fa; color: #333; }
+        .card { border-radius: 12px; }
+        .progress { height: 20px; border-radius: 10px; }
+        .progress-bar { font-weight: bold; }
+    </style>
 </head>
 
-<body class="bg-light text-dark">
+<body>
 
-<!-- === Main Container === -->
 <div class="container py-4">
-    <h1 class="mb-4 text-center">☁️ Cloud Resource Monitoring Dashboard</h1>
+    <h1 class="text-center mb-4">☁️ Cloud Resource Monitoring Dashboard</h1>
 
-    <!-- === EC2 Card === -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h4 class="card-title">EC2 CPU Utilization (Last Hour)</h4>
-            <p class="card-text fs-5">{{ cpu_values }}</p>
+    <!-- EC2 Card -->
+    <div class="card mb-4 shadow-sm p-3">
+        <h4 class="card-title mb-3">EC2 CPU Utilization (Last Hour)</h4>
+       
+        <!-- Single CPU value example -->
+        <div class="mb-3">
+            {% set cpu = cpu_values[0] if cpu_values else 0 %}
+            <div class="progress">
+                <div class="progress-bar
+                    {% if cpu < 50 %} bg-success
+                    {% elif cpu < 80 %} bg-warning
+                    {% else %} bg-danger {% endif %}"
+                    role="progressbar"
+                    style="width: {{ cpu }}%;">
+                    {{ cpu }}%
+                </div>
+            </div>
         </div>
+        <p class="small text-muted">Higher CPU → higher load</p>
     </div>
 
-    <!-- === S3 Card === -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h4 class="card-title">S3 Storage Size</h4>
-            <p class="card-text fs-5">{{ s3_size }} bytes</p>
+    <!-- S3 Card -->
+    <div class="card shadow-sm p-3">
+        <h4 class="card-title mb-3">S3 Storage Size</h4>
+       
+        {% set storage = s3_size if s3_size else 0 %}
+        {% set percent = (storage / 1000000000) * 100 if storage else 0 %}
+        <div class="progress mb-2">
+            <div class="progress-bar
+                {% if percent < 50 %} bg-success
+                {% elif percent < 80 %} bg-warning
+                {% else %} bg-danger {% endif %}"
+                role="progressbar"
+                style="width: {{ percent }}%;">
+                {{ storage }} bytes
+            </div>
         </div>
+        <p class="small text-muted">Visualizes S3 storage usage</p>
     </div>
 </div>
 
-<!-- === Footer === -->
-<footer class="text-center text-muted py-3">
+<!-- Footer -->
+<footer class="text-center mt-5 text-muted py-3">
     <small>Built with Flask + AWS (Boto3) — by Hamza</small>
 </footer>
 
