@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☁️ Cloud Resource Dashboard</title>
+
+    <!-- Basic Bootstrap for clean styling -->
+    <link 
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+      rel="stylesheet">
+
+    <!-- Optional: Chart.js (for adding charts later if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-light text-dark">
+
+<!-- === Main Container === -->
+<div class="container py-4">
+    <h1 class="mb-4 text-center">☁️ Cloud Resource Monitoring Dashboard</h1>
+
+    <!-- === EC2 Card === -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">EC2 CPU Utilization (Last Hour)</h4>
+            <p class="card-text fs-5">{{ cpu_values }}</p>
+        </div>
+    </div>
+
+    <!-- === S3 Card === -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">S3 Storage Size</h4>
+            <p class="card-text fs-5">{{ s3_size }} bytes</p>
+        </div>
+    </div>
+</div>
+
+<!-- === Footer === -->
+<footer class="text-center text-muted py-3">
+    <small>Built with Flask + AWS (Boto3) — by Hamza</small>
+</footer>
+
+</body>
+</html>
